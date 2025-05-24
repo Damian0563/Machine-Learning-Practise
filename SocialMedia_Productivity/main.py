@@ -2,7 +2,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, StandardScaler, OneHotEncoder
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn import tree
 
 file=pd.read_csv('social_media_vs_productivity.csv')
 data=pd.DataFrame(file)
@@ -23,6 +27,28 @@ def one_hot_encode_column(df, column_name):
 data = one_hot_encode_column(data, 'gender')
 data = one_hot_encode_column(data, 'job_type')
 data = one_hot_encode_column(data, 'social_platform_preference')
-
 print(data.info())
 print(data.head())
+
+
+x=data.drop(columns=['job_satisfaction_score'])
+y=data['job_satisfaction_score']
+print(data.shape)
+
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=17050,random_state=1)
+model=DecisionTreeRegressor(max_depth=20)
+model.fit(x_train,y_train)
+y_pred=model.predict(x_test)
+plt.figure(figsize=(12, 8))
+tree.plot_tree(model)
+plt.show()
+
+plt.figure(figsize=(6, 6))
+plt.scatter(x=y_pred,y=y_test)
+plt.xlabel('Predicted job satisfaction')
+plt.ylabel('Actual job satisfaction score')
+plt.show()
+
+
+print("MSE:", mean_squared_error(y_test, y_pred))
+print("R²:", r2_score(y_test, y_pred))
