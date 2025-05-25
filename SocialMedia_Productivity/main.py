@@ -33,10 +33,12 @@ print(data.head())
 
 x=data.drop(columns=['job_satisfaction_score'])
 y=data['job_satisfaction_score']
+scaler = StandardScaler().fit(x)
+x_scaled = scaler.transform(x)
 print(data.shape)
 
-x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=17050,random_state=1)
-model=DecisionTreeRegressor(max_depth=20)
+x_train,x_test,y_train,y_test=train_test_split(x_scaled,y,test_size=17050,random_state=1)
+model=DecisionTreeRegressor(max_depth=10)
 model.fit(x_train,y_train)
 y_pred=model.predict(x_test)
 plt.figure(figsize=(12, 8))
