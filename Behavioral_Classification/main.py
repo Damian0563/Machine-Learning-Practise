@@ -4,7 +4,7 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, precision_recall_curve, roc_auc_score, roc_curve, average_precision_score
 import matplotlib.pyplot as plt
 
 file=pd.read_csv("personality_dataset.csv")
@@ -62,4 +62,27 @@ for i in range(cm.shape[0]):
                  ha="center", va="center",
                  color="white" if cm[i, j] > cm.max() / 2. else "black")
 plt.tight_layout()
+plt.show()
+
+fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+roc_auc = roc_auc_score(y_test, y_pred)
+plt.figure(figsize=(6, 6))
+plt.plot(fpr, tpr, label=f"ROC Curve (AUC = {roc_auc:.2f})")
+plt.plot([0, 1], [0, 1], linestyle='--', color='gray')
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate (Recall)")
+plt.title("ROC Curve")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+precision, recall, thresholds = precision_recall_curve(y_test, y_pred)
+avg_precision = average_precision_score(y_test, y_pred)
+plt.figure(figsize=(6, 6))
+plt.plot(recall, precision, label=f"PR Curve (AP = {avg_precision:.2f})")
+plt.xlabel("Recall")
+plt.ylabel("Precision")
+plt.title("Precision-Recall Curve")
+plt.legend()
+plt.grid(True)
 plt.show()
