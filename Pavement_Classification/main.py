@@ -1,7 +1,10 @@
 import numpy as np
 import seaborn as sns #type: ignore
 import pandas as pd
-from sklearn.neighbors import KNeighborsClassifier
+import datetime
+import matplotlib.pyplot as plt
+import joblib
+from xgboost import XGBClassifier #type:ignore
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler, LabelEncoder
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import classification_report, confusion_matrix
@@ -9,6 +12,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 file=pd.read_csv('pavement.csv')
 data=pd.DataFrame(file)
 data.dropna(inplace=True)
+data=data.drop(columns=['Segment ID',"Rutting"])
 data.drop_duplicates(inplace=True)
 
 
@@ -27,18 +31,31 @@ data['Road Type']=data['Road Type'].apply(standardize)
 def label_encode(data,column):
     le=LabelEncoder()
     data[column]=le.fit_transform(data[column])
-label_encode(data,'Segment ID')
 
 x=data.drop(columns=['Needs Maintenance'])
+current_year = datetime.datetime.now().year
+x['Years Since Maintenance'] = current_year - x['Last Maintenance']
+x['AADT']=x['AADT']/max(x['AADT'])
+x.drop('Last Maintenance', axis=1, inplace=True)
 y=data['Needs Maintenance']
-scaler=MinMaxScaler().fit(x)
-x_scaled=scaler.transform(x)   
 
-model=KNeighborsClassifier(algorithm='kd_tree')
-params={
-    "n_neighbors":[3,5,7],
-    "weights": ['uniform', 'distance'],
-    "p":[2]
+plt.figure(figsize=(15,6))
+sns.set_theme(font_scale=0.65)
+ax=sns.heatmap(data.corr(),annot=True,fmt=".1f")
+ax.xaxis.tick_top()
+plt.show()
+
+x_train, x_test, y_train, y_test=train_test_split(x,y,test_size=0.2,random_state=1)
+scaler = MinMaxScaler().fit(x_train)
+x_train_scaled = scaler.transform(x_train)
+x_test_scaled = scaler.transform(x_test)  
+
+model=XGBClassifier()
+params = {
+    "n_estimators": [100, 150,200],
+    "scale_pos_weight":[1,3,5],
+    "max_depth":[3,5,7,9],
+    "learning_rate":[0.01,0.05,0.1]
 }
 grid=GridSearchCV(
     estimator=model,
@@ -48,6 +65,20 @@ grid=GridSearchCV(
     scoring='f1',
     verbose=2
 )
-x_train, x_test, y_train, y_test=train_test_split(x_scaled,y,test_size=0.2,random_state=1)
-optimized=grid.fit(x_train,y_train)
-print(optimized.best_params_)
+print(x.head())
+# optimized=grid.fit(x_train_scaled,y_train)
+# print(optimized.best_params_)
+# joblib.dump(optimized.best_estimator_,'optimized')
+#{'learning_rate': 0.1, 'max_depth': 3, 'n_estimators': 200, 'scale_pos_weight': 1}
+model=joblib.load('optimized')
+y_pred=model.predict(x_test_scaled)
+print(classification_report(y_test,y_pred))
+
+plt.figure(figsize=(8,6))
+sns.set_theme(font_scale=1)
+sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt='d', cmap='Blues', cbar=True)
+plt.title('Confusion Matrix')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
+
