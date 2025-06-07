@@ -71,7 +71,26 @@ print(x.head())
 # joblib.dump(optimized.best_estimator_,'optimized')
 #{'learning_rate': 0.1, 'max_depth': 3, 'n_estimators': 200, 'scale_pos_weight': 1}
 model=joblib.load('optimized')
+print(model.feature_importances_)
+feature_names = [
+    'PCI',                     # 0
+    'Road Type',               # 1
+    'AADT',                    # 2
+    'Average Rainfall',        # 3
+    'IRI',                     # 4
+    'Asphalt Type_Asphalt',    # 5
+    'Asphalt Type_Concrete',   # 6
+    'Years Since Maintenance'  # 7
+]
+plt.figure(figsize=(10,6))
+temp=pd.DataFrame()
+temp['Feature_names']=feature_names
+temp['Impact_on_final_prediction']=model.feature_importances_
+sns.barplot(temp, x="Feature_names", y="Impact_on_final_prediction")
+plt.show()
+
 y_pred=model.predict(x_test_scaled)
+y_proba=model.predict_proba(x_test)[:, 1]
 print(classification_report(y_test,y_pred))
 
 plt.figure(figsize=(8,6))
@@ -81,4 +100,17 @@ plt.title('Confusion Matrix')
 plt.xlabel('Predicted')
 plt.ylabel('Actual')
 plt.show()
+
+results = x_test.copy()
+results['True Label'] = y_test.values
+results['Predicted'] = y_pred
+results['Value']=y_proba
+# False Positives
+false_positives = results[(results['True Label'] == 0) & (results['Predicted'] == 1)]
+print("False Positives:")
+print(false_positives)
+# False Negatives
+false_negatives = results[(results['True Label'] == 1) & (results['Predicted'] == 0)]
+print("False Negatives:")
+print(false_negatives)
 

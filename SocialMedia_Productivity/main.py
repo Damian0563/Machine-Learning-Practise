@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns #type:ignore
 from sklearn.preprocessing import LabelEncoder, StandardScaler, OneHotEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn import tree
@@ -49,6 +49,17 @@ plt.figure(figsize=(6, 6))
 plt.scatter(x=y_pred,y=y_test)
 plt.xlabel('Predicted job satisfaction')
 plt.ylabel('Actual job satisfaction score')
+plt.show()
+
+plt.figure(figsize=(10,8))
+plt.subplots_adjust(bottom=0.4)
+cols = x.columns
+frame = pd.DataFrame()
+frame['name'] = cols
+frame['importances'] = model.feature_importances_
+sns.set_theme(font_scale=1)
+sns.barplot(frame, x='name', y='importances')
+plt.xticks(rotation=90)
 plt.show()
 
 

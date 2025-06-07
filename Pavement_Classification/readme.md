@@ -4,4 +4,5 @@ XGBoost classification algorithm is used to predict the need of maintenance/reno
 
 ## Case Study
 <img src="heat.png" alt="heatmap" width="600"/>
-<img src="confussion.png" alt="BMI-Diabetes relation" width="600"/>
+<img src="confussion.png" alt="confussion_matrix" width="600"/>
+<img src="impact.png" alt="impact" width="600"/>
