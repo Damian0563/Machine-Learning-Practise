@@ -4,6 +4,6 @@ The model is based on an SVM classification algorithm, which achieves a reasonab
 
 ## Case Study
 <img src="tests.png" style="width:600px" alt="sample tests">
-<img src="confussion" style="width:600px" alt="confussion matrix">
+<img src="confussion.png" style="width:600px" alt="confussion matrix">
 <img src="negative.png" style="width:600px" alt="positive influence">
 <img src="positive.png" style="width:600px" alt="negative influence">
