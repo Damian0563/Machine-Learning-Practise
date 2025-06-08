@@ -35,14 +35,14 @@ model=LogisticRegressionCV(
     n_jobs=-1,
     verbose=2
 )
-# model.fit(x_train,y_train)
-# print("Best regularization strength (C):", model.C_[0])
-# print("Classes:", model.classes_)
-# print("Coefficients shape:", model.coef_.shape)
+model.fit(x_train,y_train)
+print("Best regularization strength (C):", model.C_[0])
+print("Classes:", model.classes_)
+print("Coefficients shape:", model.coef_.shape)
 # Best regularization strength (C): 0.3593813663804626
 # Classes: [0 1 2]
 # Coefficients shape: (3, 152992)
-# joblib.dump(model,'optimized')
+joblib.dump(model,'optimized')
 model=joblib.load('optimized')
 
 y_pred=model.predict(x_test)
