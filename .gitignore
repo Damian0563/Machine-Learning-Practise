@@ -1,3 +1,5 @@
 venv/
 Visual_Tumor_Classification/Training
 Visual_Tumor_Classification/Testing
+Kidney_Stones_Classification/Normal
+Kidney_Stones_Classification/stone
