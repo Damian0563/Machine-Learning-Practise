@@ -66,9 +66,9 @@ grid=GridSearchCV(
     verbose=2
 )
 print(x.head())
-# optimized=grid.fit(x_train_scaled,y_train)
-# print(optimized.best_params_)
-# joblib.dump(optimized.best_estimator_,'optimized')
+optimized=grid.fit(x_train_scaled,y_train)
+#print(optimized.best_params_)
+joblib.dump(optimized.best_estimator_,'optimized')
 #{'learning_rate': 0.1, 'max_depth': 3, 'n_estimators': 200, 'scale_pos_weight': 1}
 model=joblib.load('optimized')
 print(model.feature_importances_)
