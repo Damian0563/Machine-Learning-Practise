@@ -9,6 +9,21 @@ import matplotlib.pyplot as plt #type:ignore
 import seaborn as sns #type:ignore
 import os
 
+def make_prediction(model)->None:
+    path=f"{os.getcwd()}/prediction"
+    for file in os.listdir(path):
+        image=imread(os.path.join(path,file))
+        if image.ndim == 2:
+            image = np.stack([image] * 3, axis=-1)  # grayscale to RGB
+        elif image.shape[2] == 4:
+                image = image[:, :, :3]  # RGBA to RGB
+        image=resize(image,(16,16),anti_aliasing=True)
+        image=image.astype(np.float32)
+        if image.shape == (16,16,3):
+            prediction=model.predict(image.flatten().reshape(1,-1))
+            print(f"Probability of kidney stones {round(prediction[0][0]*100,2)}% for {file}.")
+
+
 classifications=['normal','stone']
 stone_itr,normal_itr =0,0
 x_train,x_test, y_train, y_test =[],[],[],[]
@@ -30,7 +45,7 @@ for option in classifications:
                     x_train.append(image.flatten())
                     y_train.append(0)
                 else:
-                    x_test.append(image.flatten)
+                    x_test.append(image.flatten())
                     y_test.append(0)
                 normal_itr+=1
             else:
@@ -41,6 +56,10 @@ for option in classifications:
                     x_test.append(image.flatten())
                     y_test.append(1)
                 stone_itr+=1
+x_train=np.array(x_train, dtype=np.float32)
+y_train=np.array(y_train, dtype=np.float32).reshape(-1, 1)
+x_test=np.array(x_test, dtype=np.float32)
+y_test=np.array(y_test, dtype=np.float32).reshape(-1, 1)
 print("Concluded preprocessing data images and training-testing splits.")
 try:
     model=tf.keras.models.Sequential([
@@ -51,28 +70,27 @@ try:
     loss_function=tf.keras.losses.BinaryCrossentropy()
     model.compile(optimizer="adam",loss=loss_function,metrics=['accuracy'])
     print("Training model...")
-    model.fit(x_train,y_train,batch_size=200,epochs=5,verbose=0)
-    evaluation=model.evaluate(x_test,y_test,verbose=2)
+    history=model.fit(x_train,y_train,batch_size=200,epochs=5,verbose=1)
+    evaluation=model.evaluate(x_test,y_test,verbose=1)
     print(f"Model evaluation: {evaluation}")
     joblib.dump(model,"trained")
+    model=joblib.load("trained")
+    plt.figure(figsize=(10,5))
+    plt.plot(history.history['accuracy'])
+    plt.title('Model accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epochs')
+    plt.show()
+
+    plt.figure(figsize=(10,5))
+    plt.plot(history.history['loss'])
+    plt.title('Model loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epochs')
+    plt.show()
+    make_prediction(model)
 except Exception as e:
     print(e)
-
-#plt.figure(figsize=(10,5))
-#plt.plot(history.history['accuracy'])
-#plt.title('Model accuracy')
-#plt.ylabel('Accuracy')
-#plt.xlabel('Epochs')
-#plt.show()
-
-#plt.figure(figsize=(10,5))
-#plt.plot(history.history['loss'])
-#plt.title('Model loss')
-#plt.ylabel('Loss')
-#plt.xlabel('Epochs')
-#plt.show()
-
-
 
 
 
